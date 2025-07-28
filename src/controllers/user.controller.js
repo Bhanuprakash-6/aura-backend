@@ -4,6 +4,7 @@ import {User} from "../models/user.model.js";
 import { uploadOnCloudinary } from "../utils/cloudnary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 
+
 const registerUser = asyncHandler(async (req, res) => {
     //get user data from request body
     //validation//
@@ -13,6 +14,8 @@ const registerUser = asyncHandler(async (req, res) => {
     //create user object - create entry in db
     //remove password and refresh token field from response
     //return response with user data
+
+   
 
     const { username, email, fullName, password } = req.body;
     console.log(`email: ${email}`);
@@ -25,7 +28,7 @@ const registerUser = asyncHandler(async (req, res) => {
     }
 
     //check if user already exists
-    const existedUser = User.findOne({
+    const existedUser = await User.findOne({
         $or: [{ username},{email}]
     })
 
@@ -44,21 +47,30 @@ const registerUser = asyncHandler(async (req, res) => {
     const avatar = await uploadOnCloudinary(avatarLocationPath)
     const coverImage = await uploadOnCloudinary(coverImageLocationPath)
 
+    // let coverImageLocalPath;
+    // if (req.files && Array.isArray(req.files.
+    // coverImage) && req.files.coverImage.length > 0) {
+    //     coverImageLocalPath = req.files.coverImage[0].path
+    // }
+
+    
     if(!avatar) {
         throw new ApiError(500, "Failed to upload avatar to cloudinary");
     }
 
+    
+
     //entry to db
-    const User = await User.create({
+    const newUser = await User.create({
         fullName,
         avatar: avatar.url,
-        convertImage: coverImage?.url || "",
+        coverImage: coverImage,
         email,
         password,
         username: username.toLowerCase()
     })
 
-    const createdUser = await User.findById(username._id).select(" -password -refreshToken");
+    const createdUser = await User.findById(newUser._id).select(" -password -refreshToken");
 
     if(!createdUser) {
         throw new ApiError(500, "something  went while registering the user");
