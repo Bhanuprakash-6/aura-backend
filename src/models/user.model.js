@@ -1,6 +1,8 @@
 import mongoose, {Schema} from "mongoose";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
+ 
+// Define the User schema
 
 const userSchema = new Schema({
     username: {
